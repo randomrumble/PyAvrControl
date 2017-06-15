@@ -26,7 +26,7 @@ from multiprocessing import Process, queues
 from threading import Semaphore
 from denon_cmds import commands
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 _CONCURRENT = 1
 

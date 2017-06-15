@@ -88,6 +88,24 @@ class DenonCommandConf(_CommandStore):
                                                                 call,
                                                                 param))
 
+  @staticmethod
+  def param_parser(param, param_conf):
+    split_type = param_conf.split(':', 1)
+    if split_type[0] == 'list':
+      options = map(str.strip, split_type[1].split(','))
+      if param in options:
+        return param
+    if split_type[0] == 'range':
+      options = map(int, map(str.strip, split_type[1].split('-')))
+      try:
+        int_param = int(param)
+      except ValueError as e:
+        return False
+      if int_param >= options[0] and int_param <= options[1]:
+        return param
+    return False
+
+
 """
 Denon AVR protocol commands
 
@@ -104,7 +122,7 @@ Note: No guarantee that all In-Command AVRs will support all the
 # Volume controls
 # Page 7 and 8, v7.6.0
 cmd_vol = {
-  'volume': { 
+  'volume': {
     'up':     [ 'MVUP' ],
     'down':   [ 'MVDOWN' ],
     'set':    [ 'MV', 'range:00-99' ],
@@ -118,40 +136,40 @@ cmd_vol = {
 # Channel volume controls
 # Page 7 and 8, v7.6.0
 cmd_channel_vol = {
-  'channel_volume': { 
+  'channel_volume': {
     'front_left_up': [ 'CVFL UP' ],
     'front_left_down': [ 'CVFL DOWN' ],
-    'front_left_set': [ 'CVFL', 'range:38-62' ],
+    'front_left_set': [ 'CVFL ', 'range:38-62' ],
     'front_right_up': [ 'CVFR UP' ],
     'front_right_down': [ 'CVFR DOWN' ],
-    'front_right_set': [ 'CVFR', 'range:38-62' ],
+    'front_right_set': [ 'CVFR ', 'range:38-62' ],
     'center_up': [ 'CVC UP' ],
     'center_down': [ 'CVC DOWN' ],
-    'center_set': [ 'CVC', 'range:38-62' ],
+    'center_set': [ 'CVC ', 'range:38-62' ],
     'sub_up': [ 'CVSW UP' ],
     'sub_down': [ 'CVSW DOWN' ],
-    'sub_set': [ 'CVSW', 'range:38-62' ],
+    'sub_set': [ 'CVSW ', 'range:38-62' ],
     'surround_left_up': [ 'CVSL UP' ],
     'surround_left_down': [ 'CVSL DOWN' ],
-    'surround_left_set': [ 'CVSL', 'range:38-62' ],
+    'surround_left_set': [ 'CVSL ', 'range:38-62' ],
     'sur_right_up': [ 'CVSR UP' ],
     'sur_right_down': [ 'CVSR DOWN' ],
-    'sur_right_set': [ 'CVSR', 'range:38-62' ],
+    'sur_right_set': [ 'CVSR ', 'range:38-62' ],
     'sur_back_right_up': [ 'CVSR UP' ],
     'sur_back_right_down': [ 'CVSR DOWN' ],
-    'sur_back_right_set': [ 'CVSR', 'range:38-62' ],
+    'sur_back_right_set': [ 'CVSR ', 'range:38-62' ],
     'front_height_left_up': [ 'CVFHL UP' ],
     'front_height_left_down': [ 'CVFHL DOWN' ],
-    'front_height_left_set': [ 'CVFHL', 'range:38-62' ],
+    'front_height_left_set': [ 'CVFHL ', 'range:38-62' ],
     'front_height_right_up': [ 'CVFHR UP' ],
     'front_height_right_down': [ 'CVFHR DOWN' ],
-    'front_height_right_set': [ 'CVFHR', 'range:38-62' ],
+    'front_height_right_set': [ 'CVFHR ', 'range:38-62' ],
     'front_wide_left_up': [ 'CVFWL UP' ],
     'front_wide_left_down': [ 'CVFWL DOWN' ],
-    'front_wide_left_set': [ 'CVFWL', 'range:38-62' ],
+    'front_wide_left_set': [ 'CVFWL ', 'range:38-62' ],
     'front_wide_right_up': [ 'CVFWR UP' ],
     'front_wide_right_down': [ 'CVFWR DOWN' ],
-    'front_wide_right_set': [ 'CVFWR', 'range:38-62' ],
+    'front_wide_right_set': [ 'CVFWR ', 'range:38-62' ],
     '_desc': 'Increase, decrease, or set specific channel volume'
   }
 }
@@ -170,7 +188,7 @@ cmd_main_pwr = {
 # Main zone power controls
 # Page 9, v7.6.0
 cmd_zone_pwr = {
-  'main_zone': { 
+  'main_zone': {
     'on': [ 'ZMON' ],
     'off': [ 'ZMOFF' ],
     'status': [ 'ZM?' ],
@@ -251,7 +269,7 @@ cmd_audio_mode = {
 # Video input source
 # Page 10, v7.6.0
 cmd_video_input = {
-  'video_input': { 
+  'video_input': {
     'dvd': [ 'SVDVD' ],
     'bd': [ 'SVBD' ],
     'tv': [ 'SVTV' ],
@@ -269,9 +287,9 @@ cmd_video_input = {
 
 # Surround mode
 # Page 11, v7.6.0
-# Note: "quick memory" not implemented 
+# Note: "quick memory" not implemented
 cmd_surround_mode = {
-  'surround_mode': { 
+  'surround_mode': {
      'movie': [ 'MSMOVIE' ],
      'music': [ 'MSMUSIC' ],
      'game': [ 'MSGAME' ],

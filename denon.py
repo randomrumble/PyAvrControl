@@ -61,7 +61,7 @@ class DenonAvr(object):
     self.host = host
     self.port = port
     self._build_command_call()
-    
+
   @funnel
   def _run_cmd(self, cmd):
     """
@@ -70,7 +70,7 @@ class DenonAvr(object):
     """
     with DenonCommand(self.host, self.port) as session:
       session.send(cmd)
-      return session.recieve()  
+      return session.recieve()
 
   def _build_command_call(self):
     """
@@ -84,11 +84,22 @@ class DenonAvr(object):
       setattr(self, parent, commands[parent])
 
   def _register_cmd(self, cmd_content, cmd_param=None):
-    if cmd_param is not None:
-      cmd_content += str(cmd_param)
     def _execute_cmd(*args):
+      _cmd_param = cmd_param
+      _cmd_content = cmd_content  
+      if (_cmd_param is not None) and (len(args) == 0):
+        sys.stderr.write('Missing parameter')
+        return False
+      elif cmd_param is not None:
+        _param = commands.param_parser(args[0], _cmd_param)
+        if _param:
+          _cmd_content += '%s' % _param
+          print(_cmd_content)
+        else:
+          sys.stderr.write('Invalid parameter: %s' % args[0])
+          return False
       try:
-        return self._run_cmd(cmd_content)
+        return self._run_cmd(_cmd_content)
       except DenonAvrConnectException as e:
         sys.stderr.write('Error: %s\n' % e)
     return _execute_cmd
@@ -97,6 +108,7 @@ class DenonAvr(object):
     if hasattr(self, key):
       return getattr(self, key)
     raise DenonAvrException('Invalid command: %s' % key)
+
 
 class DenonCommand(object):
 
@@ -135,7 +147,7 @@ class DenonCommand(object):
 
   def recieve(self):
     return self.reciever.read()
-    
+
   def recieve_string(self, *args, **kwargs):
     r = self.recieve(*args, **kwargs)
     return ''.join(r)
@@ -170,7 +182,7 @@ class _Reciever(object):
       Note: timeout needs to be checked immediately after
       block releases, but before the next while-loop
       iteration
-      """ 
+      """
       _timeout = time.time() - t_start
       if (_timeout >= self.timeout):
         break

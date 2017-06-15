@@ -19,7 +19,7 @@ along with PyAvrControl.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
 
-from denon_cmds import commands
+from denon_cmds import commands, DenonCommandConf
 from denon import DenonAvr
 
 
@@ -34,7 +34,7 @@ class DenonAvrCLI(object):
     sys.stderr.write('          %s 192.168.1.111 audio_input dvd\n' % sys.argv[0])
 
   @staticmethod
-  def show_help(): 
+  def show_help():
     sys.stderr.write('\nAvailable Commands:\n')
     for category in commands.available():
       sys.stderr.write('\n[%s]\n' % commands[category].description)
@@ -42,7 +42,7 @@ class DenonAvrCLI(object):
       for cmd in commands[category]:
         if cmd.params is not None:
           sys.stderr.write('  %s%s %s\n' % ((' ' * len(category)), cmd.name, cmd.params))
-        else: 
+        else:
           sys.stderr.write('  %s%s\n' % ((' ' * len(category)), cmd.name))
 
   @staticmethod
@@ -60,7 +60,7 @@ class DenonAvrCLI(object):
       set_cmd = sys.argv[3]
       set_param = None
       if commands[set_group][set_cmd].params:
-        set_param = self.param_parser(sys.argv[4], commands[set_group][set_cmd].params)
+        set_param = DenonCommandConf.param_parser(sys.argv[4], commands[set_group][set_cmd].params)
     except (IndexError, KeyError) as e:
       sys.stderr.write('Invalid arguments: %s (try --help)\n' % ' '.join(sys.argv[1:]))
       DenonAvrCLI.show_short_help()
@@ -77,24 +77,7 @@ class DenonAvrCLI(object):
     if cmd_out is not None:
       sys.stdout.write('%s\n' % ''.join(cmd_out))
 
-  def param_parser(self, param, param_conf):
-    split_type = param_conf.split(':', 1)    
-    if split_type[0] == 'list':
-      options = map(str.strip, split_type[1].split(','))
-      if param in options:
-        return param
-    if split_type[0] == 'range':
-      options = map(int, map(str.strip, split_type[1].split('-')))
-      print('%s vs %s' % (options, param))
-      try:
-        int_param = int(param)
-      except ValueError as e:
-        return False
-      if int_param >= options[0] and int_param <= options[1]:
-        return param
-    return False
-      
-   
+
 if __name__ == '__main__':
   DenonAvrCLI.parse_help()
   cli = DenonAvrCLI()
